@@ -326,8 +326,8 @@ function dishCardHTML(d) {
           <span>У ${round(c.c)}</span>
         </div>
         <div class="dish-foot">
-          <button class="dish-buy" data-add="${d.id}" aria-label="Добавить в корзину">
-            <span>${c.price} ₽</span>
+          <button class="dish-buy ${getDishQtyInCart(d.id) > 0 ? 'in-cart' : ''}" data-add="${d.id}" aria-label="Добавить в корзину">
+            <span>${getDishQtyInCart(d.id) > 0 ? getDishQtyInCart(d.id) + '× ' : ''}${c.price} ₽</span>
             <span class="dish-buy-plus">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
                 <path d="M12 5v14M5 12h14"/>
@@ -338,6 +338,29 @@ function dishCardHTML(d) {
       </div>
     </article>
   `;
+}
+
+/* Сколько раз это блюдо уже в корзине */
+function getDishQtyInCart(dishId) {
+  const d = DB.dishes.find(x => x.id === dishId);
+  if (!d) return 0;
+  const item = state.cart.find(i => i.name === d.name);
+  return item ? item.qty : 0;
+}
+
+/* Обновить все кнопки-плашки этого блюда на текущем экране */
+function updateDishBuyButtons(dishId) {
+  const d = DB.dishes.find(x => x.id === dishId);
+  if (!d) return;
+  const qty = getDishQtyInCart(dishId);
+  const c = calcComposition(d);
+
+  document.querySelectorAll(`[data-add="${dishId}"]`).forEach(btn => {
+    if (!btn.classList.contains('dish-buy')) return;   // пропускаем кнопку в модалке
+    btn.classList.toggle('in-cart', qty > 0);
+    const label = btn.querySelector('span');
+    if (label) label.textContent = (qty > 0 ? qty + '× ' : '') + c.price + ' ₽';
+  });
 }
 
 /* ---------- Меню ---------- */
@@ -905,7 +928,9 @@ if (e.target.closest('#confirm-remove-btn')) {
 const add = e.target.closest('[data-add]');
 if (add) {
   e.stopPropagation();
-  addDishToCart(add.dataset.add);
+  const id = add.dataset.add;
+  addDishToCart(id);
+  updateDishBuyButtons(id);                    // ← добавили
   if ($('#dish-modal')?.classList.contains('open')) closeDish();
   return;
 }

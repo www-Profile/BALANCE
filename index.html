@@ -25,6 +25,12 @@
 
   <div class="hero">
 
+    <!-- Фото как фон (путь меняй здесь) -->
+    <div class="hero-bg" style="background-image: url('img/hero.png')"></div>
+
+    <!-- Затемнение для читаемости текста -->
+    <div class="hero-overlay"></div>
+
     <!-- Логотип сверху -->
     <div class="hero-top">
       <div class="logo">
@@ -32,9 +38,6 @@
         BALANCE
       </div>
     </div>
-
-    <!-- Фото тарелки (пока placeholder, потом заменишь background-image) -->
-    <div class="hero-media" id="hero-media" aria-label="Фирменная тарелка BALANCE"></div>
 
     <h1 class="hero-title">Ешь <em>осознанно</em>.<br />Живи <em>легко</em>.</h1>
 
@@ -156,7 +159,7 @@
     <div class="empty-ico">🛍️</div>
     <h3>Корзина пуста</h3>
     <p>Соберите тарелку или выберите блюдо из меню</p>
-    <button class="btn btn-primary" data-nav="menu">Перейти в меню</button>
+    <button class="btn btn-lime" data-nav="menu">Перейти в меню</button>
   </div>
 
   <div id="cart-filled" hidden>
@@ -178,19 +181,22 @@
         <button class="btn btn-outline btn-block" data-add-address>+ Добавить адрес</button>
       </div>
 
-      <div id="addresses-empty" class="delivery-info delivery-info--empty" hidden>
-        <div class="delivery-empty-ico">📍</div>
-        <div class="delivery-empty-title">Нет сохранённых адресов</div>
-        <p class="delivery-empty-text">Добавьте адрес доставки, чтобы продолжить</p>
-        <button class="btn btn-lime" data-add-address style="margin-top:14px">Добавить адрес</button>
+      <div id="addresses-empty" class="pickup-card" hidden>
+        <div class="pickup-bg" style="background-image: url('img/address-empty.png')"></div>
+        <div class="pickup-overlay"></div>
+        <div class="pickup-content">
+          <button class="btn btn-lime btn-block" data-add-address>Добавить адрес</button>
+        </div>
       </div>
     </div>
 
-    <!-- Самовывоз: заглушка -->
-    <div id="delivery-pickup" class="delivery-info delivery-info--empty" hidden>
-      <div class="delivery-empty-ico">🏠</div>
-      <div class="delivery-empty-title">Пока нет кафе</div>
-      <p class="delivery-empty-text">Мы работаем только на доставку. Выберите «Доставка», чтобы оформить заказ.</p>
+    <!-- Самовывоз: заглушка с фото -->
+    <div id="delivery-pickup" class="pickup-card" hidden>
+      <div class="pickup-bg" style="background-image: url('img/pickup.png')"></div>
+      <div class="pickup-overlay"></div>
+      <div class="pickup-content">
+        <p class="pickup-text">Пока нет кафе. Мы работаем только на доставку. Выберите «Доставка», чтобы оформить заказ.</p>
+      </div>
     </div>
 
     <h3 class="cart-section-title">Корзина</h3>
@@ -225,16 +231,42 @@
 
   <div class="stats">
     <button class="stat" data-stat="orders">
-      <b id="stat-orders">0</b>
-      <span>Заказов</span>
+      <span class="stat-row">
+        <b id="stat-orders">0</b>
+        <span class="stat-ico">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 9h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>
+  <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2"/>
+  <path d="M9 7V5.5a3 3 0 0 1 6 0V7"/>
+</svg>
+        </span>
+      </span>
+      <span class="stat-label">Заказов</span>
     </button>
+
     <button class="stat" data-stat="favorites">
-      <b id="stat-favs">0</b>
-      <span>Избранное</span>
+      <span class="stat-row">
+        <b id="stat-favs">0</b>
+        <span class="stat-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/>
+          </svg>
+        </span>
+      </span>
+      <span class="stat-label">Избранное</span>
     </button>
+
     <button class="stat" data-stat="discount">
-      <b id="stat-discount">0%</b>
-      <span>Скидка</span>
+      <span class="stat-row">
+        <b id="stat-discount">0%</b>
+        <span class="stat-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+            <circle cx="7" cy="7" r="1.2" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+      </span>
+      <span class="stat-label">Скидка</span>
     </button>
   </div>
 
@@ -333,7 +365,11 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     </button>
     <button class="nav-btn" data-nav="orders" aria-label="Заказы">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M4 9h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>
+  <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2"/>
+  <path d="M9 7V5.5a3 3 0 0 1 6 0V7"/>
+</svg>
       <span>Заказы</span>
       <span class="nav-badge" id="cart-badge" hidden>0</span>
     </button>
