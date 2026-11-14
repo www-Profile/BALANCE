@@ -1,0 +1,22 @@
+{
+  "name": "BALANCE — Сбалансированная еда",
+  "short_name": "BALANCE",
+  "description": "Полезная сбалансированная еда. Точный вес, честный КБЖУ.",
+  "lang": "ru",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F6F0",
+  "theme_color": "#172B3A",
+  "categories": ["food", "health", "lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
