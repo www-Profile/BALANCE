@@ -373,6 +373,8 @@ function renderCategories() {
 
 function renderMenu() {
   renderCategories();
+  $$('.chip-filter').forEach(b => b.classList.toggle('active', b.dataset.filter === state.filter));
+
   let list = DB.dishes.slice();
   if (state.category !== 'all') list = list.filter(d => d.cats.includes(state.category));
   if (state.search.trim()) {
@@ -947,6 +949,18 @@ function toggleFav(id) {
 document.addEventListener('click', (e) => {
   const nav = e.target.closest('[data-nav]');
 
+// ── Сброс фильтров из пустого состояния меню
+if (e.target.closest('#menu-empty-reset')) {
+  state.category = 'all';
+  state.search = '';
+  state.filter = 'all';
+  const searchInput = $('#search-input');
+  if (searchInput) searchInput.value = '';
+  $$('.chip-filter').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
+  renderMenu();
+  return;
+}
+
 // --- Кнопка «Удалить» на экране редактирования ---
 if (e.target.closest('#af-delete')) {
   openConfirm('Удалить адрес?', 'Адрес будет удалён из списка', deleteCurrentAddress);
@@ -1439,6 +1453,7 @@ function preloadAllImages() {
   urls.add('img/hero.png');
   urls.add('img/pickup.png');
   urls.add('img/address-empty.png');
+  urls.add('img/cart-empty.png');
 
   // Все картинки из базы (блюда + ингредиенты тарелки)
   if (typeof DB !== 'undefined') {

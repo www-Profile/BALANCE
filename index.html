@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#F7F6F0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <meta name="theme-color" content="#F7F6F0">
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
@@ -85,7 +84,7 @@
   <div class="showcase">
     <div class="showcase-track" id="showcase-track">
 <article class="showcase-card" data-showcase="athletes" style="cursor:pointer">
-  <img src="img/showcase-1.jpg" alt="Скидки спортсменам" loading="lazy">
+  <img src="img/showcase-1.png" alt="Скидки спортсменам" loading="lazy">
   <div class="showcase-caption">
     <h3 class="showcase-caption-title">Скидки спортсменам</h3>
   </div>
@@ -183,11 +182,15 @@
     <button class="chip-filter" data-filter="highprotein">Много белка</button>
   </div>
   <div class="dish-grid" id="menu-list"></div>
-  <div class="empty" id="menu-empty" hidden style="grid-column:1/-1">
-    <div class="empty-ico">🔍</div>
-    <h3>Ничего не найдено</h3>
-    <p>Попробуйте изменить запрос или фильтры</p>
+<div class="pickup-card pickup-card--cart-empty" id="menu-empty" hidden style="grid-column:1/-1">
+  <div class="pickup-bg" style="background-image: url('img/cart-empty.png')"></div>
+  <div class="pickup-overlay"></div>
+  <div class="pickup-content">
+    <h3 class="pickup-title">Ничего не найдено</h3>
+    <p class="pickup-text">Попробуйте изменить запрос или фильтры</p>
+    <button class="btn btn-lime btn-block" id="menu-empty-reset" style="margin-top:14px">Сбросить фильтры</button>
   </div>
+</div>
 </section>
 
     <!-- ============ СОБРАТЬ ============ -->
@@ -195,8 +198,15 @@
   <header class="topbar"><h1 class="screen-title">Собрать тарелку</h1></header>
   <div class="build-layout">
     <div class="build-visual">
-      <div class="plate-wrap" id="build-plate"></div>
-      <div class="plate-size-label" id="plate-size-label"></div>
+<div class="plate-stack">
+  <div class="photo-wrap">
+    <div class="photo-shadow" aria-hidden="true"></div>
+    <img class="build-photo-under" src="img/build-photo.png" alt="">
+  </div>
+  <div class="plate-wrap" id="build-plate"></div>
+</div>
+
+<div class="plate-size-label" id="plate-size-label"></div>
       <div class="plate-legend" id="plate-legend"></div>
       <div class="size-selector" id="size-selector"></div>
     </div>
@@ -234,12 +244,15 @@
 <section id="screen-orders" class="screen">
   <header class="topbar"><h1 class="screen-title">Заказы</h1></header>
 
-  <div id="cart-empty" class="empty" hidden>
-    <div class="empty-ico">🛍️</div>
-    <h3>Корзина пуста</h3>
-    <p>Соберите тарелку или выберите блюдо из меню</p>
-    <button class="btn btn-lime" data-nav="menu">Перейти в меню</button>
+<div id="cart-empty" class="pickup-card pickup-card--cart-empty" hidden>
+  <div class="pickup-bg" style="background-image: url('img/cart-empty.png')"></div>
+  <div class="pickup-overlay"></div>
+  <div class="pickup-content">
+    <h3 class="pickup-title">Корзина пуста</h3>
+    <p class="pickup-text">Соберите тарелку или выберите блюдо из меню</p>
+    <button class="btn btn-lime btn-block" data-nav="menu" style="margin-top:14px">Перейти в меню</button>
   </div>
+</div>
 
   <div id="cart-filled" hidden>
     <h3 class="cart-section-title">Способ получения</h3>
