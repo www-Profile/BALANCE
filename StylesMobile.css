@@ -167,6 +167,7 @@ img { display: block; max-width: 100%; }
   max-width: 100%;
   margin: 0 auto;
   padding: 0 var(--pad) calc(var(--nav-h) + 32px + env(safe-area-inset-bottom));
+  padding-top: env(safe-area-inset-top);
 }
 
 .screen { display: none; }
