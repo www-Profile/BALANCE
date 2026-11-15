@@ -18,10 +18,38 @@
 </head>
 <body>
 
-    <!-- ============ SPLASH / ЭКРАН ЗАГРУЗКИ ============ -->
-  <div class="splash" id="splash" aria-hidden="true">
-    <span class="splash-letter">B</span>
-  </div>
+<!-- ============ SPLASH / ЭКРАН ЗАГРУЗКИ ============ -->
+<div class="splash" id="splash" aria-hidden="true">
+  <svg class="splash-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" aria-label="BALANCE">
+    <defs>
+      <filter id="letterShadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#172B3A" flood-opacity="0.22"/>
+      </filter>
+    </defs>
+
+    <rect width="512" height="512" rx="112" fill="#B7E36A"/>
+
+
+    <g filter="url(#letterShadow)" transform="translate(240 256) skewX(-9) translate(-256 -256)">
+      <path fill-rule="evenodd" fill="#172B3A" d="
+        M 155 110 L 285 110
+        Q 375 110 375 195
+        Q 375 245 320 258
+        Q 390 268 390 350
+        Q 390 402 285 402
+        L 155 402 Z
+        M 200 160 L 280 160
+        Q 325 160 325 195
+        Q 325 225 280 225
+        L 200 225 Z
+        M 200 292 L 290 292
+        Q 340 292 340 340
+        Q 340 372 290 372
+        L 200 372 Z
+      "/>
+    </g>
+  </svg>
+</div>
 
   <div class="grain" aria-hidden="true"></div>
 
