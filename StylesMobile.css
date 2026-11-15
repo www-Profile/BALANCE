@@ -87,7 +87,27 @@ img { display: block; max-width: 100%; }
   place-items: center;
   overflow: hidden;
   opacity: 1;
-  transition: none;   /* ← убрали плавность */
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0.5s;
+}
+
+/* Плавный переход в молочный сверху — под статус-бар */
+.splash::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(env(safe-area-inset-top, 0px) + 50px);
+  background: linear-gradient(
+    180deg,
+    #F7F6F0 0%,
+    rgba(247, 246, 240, 0.85) 35%,
+    rgba(247, 246, 240, 0.35) 65%,
+    rgba(247, 246, 240, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Класс, который добавляет app.js когда загрузка завершена */
