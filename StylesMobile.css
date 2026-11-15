@@ -370,7 +370,7 @@ img { display: block; max-width: 100%; }
   padding: 22px var(--pad) 40px;
   overflow: hidden;
   isolation: isolate;
-  min-height: 104svh;
+  min-height: 107svh;
   display: flex;
   flex-direction: column;
 }
@@ -2003,7 +2003,7 @@ img { display: block; max-width: 100%; }
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(14px + env(safe-area-inset-bottom));
+  bottom: 20px;
   z-index: 100;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
