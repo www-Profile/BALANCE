@@ -344,7 +344,8 @@ function dishCardHTML(d) {
 function getDishQtyInCart(dishId) {
   const d = DB.dishes.find(x => x.id === dishId);
   if (!d) return 0;
-  const item = state.cart.find(i => i.name === d.name);
+  const key = `${d.name}::${compKey({ size: d.size, garnish: d.garnish, protein: d.protein, veg: d.veg })}`;
+  const item = state.cart.find(i => i.key === key);
   return item ? item.qty : 0;
 }
 
@@ -655,24 +656,87 @@ function closeModal(id) {
   document.body.style.overflow = '';
 }
 
-function openProfileEdit() {
+function openProfileEdit(pendingEmailEnable = false) {
+  state._pendingEmailEnable = pendingEmailEnable;
+
   const u = state.user;
   $('#pe-firstName').value = u.firstName || '';
   $('#pe-lastName').value  = u.lastName  || '';
   $('#pe-email').value     = u.email     || '';
+
+  // Сброс ошибки + подсказка по умолчанию
+  const emailInput = $('#pe-email');
+  const emailHint  = $('#pe-email-hint');
+  emailInput.classList.remove('field-error');
+  if (emailHint) {
+    emailHint.classList.remove('error');
+    emailHint.textContent = 'Реальный email — например, ivan@mail.ru';
+  }
+
+  // Снимаем ошибку при вводе
+  emailInput.oninput = () => {
+    emailInput.classList.remove('field-error');
+    if (emailHint) {
+      emailHint.classList.remove('error');
+      emailHint.textContent = 'Реальный email — например, ivan@mail.ru';
+    }
+  };
+
   openModal('profile-edit-modal');
 }
 
 function saveProfileEdit() {
+  const emailInput = $('#pe-email');
+  const emailHint  = $('#pe-email-hint');
+  const email = emailInput.value.trim();
+
+  // Валидация email, если поле не пустое
+  if (email && !isValidEmail(email)) {
+    emailInput.classList.add('field-error');
+    if (emailHint) {
+      emailHint.classList.add('error');
+      emailHint.textContent = 'Похоже, это не email. Пример: ivan@mail.ru';
+    }
+    emailInput.focus();
+    toast('Проверьте адрес почты');
+    return;
+  }
+
+  // Поле пустое, но пользователь пришёл включить рассылку — не даём сохранить «включённое» состояние
+  if (state._pendingEmailEnable && !email) {
+    emailInput.classList.add('field-error');
+    if (emailHint) {
+      emailHint.classList.add('error');
+      emailHint.textContent = 'Без почты рассылка не работает — укажите адрес';
+    }
+    emailInput.focus();
+    return;
+  }
+
+  emailInput.classList.remove('field-error');
+  if (emailHint) {
+    emailHint.classList.remove('error');
+    emailHint.textContent = 'Реальный email — например, ivan@mail.ru';
+  }
+
   state.user = {
     firstName: $('#pe-firstName').value.trim(),
     lastName:  $('#pe-lastName').value.trim(),
-    email:     $('#pe-email').value.trim()
+    email:     email
   };
+
+  // Если пришли сюда через тумблер — включаем рассылку автоматически
+  let emailTurnedOn = false;
+  if (state._pendingEmailEnable && email) {
+    state.settings.email = true;
+    emailTurnedOn = true;
+  }
+  state._pendingEmailEnable = false;
+
   save();
   closeModal('profile-edit-modal');
   renderProfile();
-  toast('Данные сохранены');
+  toast(emailTurnedOn ? 'Почта сохранена, рассылка включена' : 'Данные сохранены');
 }
 
 function openOrdersHistory() {
@@ -726,6 +790,16 @@ function plural(n, one, few, many) {
   return many;
 }
 
+/* ---------- Валидация email ---------- */
+
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const s = email.trim();
+  if (s.length > 254) return false;
+  // name@domain.tld — без пробелов, минимум одна точка в домене, TLD >= 2 букв
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,}$/.test(s);
+}
+
 /* ---------- Профиль ---------- */
 function renderProfile() {
   const u = state.user;
@@ -740,13 +814,24 @@ function renderProfile() {
   $('#stat-favs').textContent     = state.favorites.length;
   $('#stat-discount').textContent = getDiscountPercent() + '%';
 
-  $$('[data-setting]').forEach(btn => {
-    btn.classList.toggle('on', !!state.settings[btn.dataset.setting]);
-    btn.onclick = () => {
-      state.settings[btn.dataset.setting] = !state.settings[btn.dataset.setting];
-      save(); renderProfile();
-    };
-  });
+$$('[data-setting]').forEach(btn => {
+  btn.classList.toggle('on', !!state.settings[btn.dataset.setting]);
+  btn.onclick = () => {
+    const key = btn.dataset.setting;
+    const willBeOn = !state.settings[key];
+
+    // Включение email-рассылки без валидной почты → открываем профиль
+    if (key === 'email' && willBeOn && !isValidEmail(state.user.email)) {
+      openProfileEdit(true);   // ← флаг «включаем рассылку после сохранения»
+      toast('Добавьте реальную почту для рассылки');
+      return;
+    }
+
+    state.settings[key] = willBeOn;
+    save();
+    renderProfile();
+  };
+});
 }
 
 function getDiscountPercent() {
@@ -879,6 +964,19 @@ if (e.target.closest('[data-add-address]')) {
   }
   if (nav) return showScreen(nav.dataset.nav);
 
+  // ── Карусель: карточка «Скидки спортсменам»
+const showcaseCard = e.target.closest('[data-showcase="athletes"]');
+if (showcaseCard) {
+  e.stopPropagation();
+  openModal('athletes-modal');
+  return;
+}
+
+// ── Закрытие модалки DDX
+if (e.target.closest('[data-close-athletes]')) {
+  return closeModal('athletes-modal');
+}
+
     // --- Профиль: статистика, карандаш, модалки ---
   const stat = e.target.closest('[data-stat]');
   if (stat) {
@@ -947,6 +1045,7 @@ document.addEventListener('keydown', (e) => {
   closeModal('orders-history-modal');
   closeModal('favorites-modal');
   closeModal('discount-modal');
+  closeModal('athletes-modal');   // ← добавить
 });
 
 document.addEventListener('input', (e) => {
@@ -963,10 +1062,12 @@ function initModalSwipe() {
   let currentY = 0;
   let dragging = false;
 
-  sheet.addEventListener('touchstart', (e) => {
-    // если контент прокручен — не перехватываем жест, даём скроллу работать
-    if (sheet.scrollTop > 0) return;
-    startY = e.touches[0].clientY;
+const modalBody = sheet.querySelector('.modal-body');
+
+sheet.addEventListener('touchstart', (e) => {
+  // если контент прокручен — не перехватываем жест, даём скроллу работать
+  if (modalBody && modalBody.scrollTop > 0) return;
+  startY = e.touches[0].clientY;
     currentY = startY;
     dragging = true;
     sheet.style.transition = 'none';
@@ -1100,7 +1201,7 @@ function renderAddressForm() {
   });
 
   // Координаты
-  if (addr?.coords) state.coords = addr.coords;
+  if (addr?.coords) state.coords = addr?.coords || [55.753544, 37.621202];
 
   // Кнопки
   const actionsEl = document.getElementById('af-actions');
@@ -1227,10 +1328,11 @@ async function fillAddressFields(coords) {
     } catch (e) {}
   }
 
-  const setVal = (id, val) => {
-    const el = document.getElementById(id);
-    if (el && val !== undefined) el.value = val || '';
-  };
+const setVal = (id, val) => {
+  if (!val) return;              // не трогаем, если пусто
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}; 
   setVal('af-city', data.city);
   setVal('af-street', data.street);
   setVal('af-house', data.house);
@@ -1319,11 +1421,256 @@ function deleteCurrentAddress() {
   showScreen('orders');
 }
 
+/* ---------- Splash / экран загрузки ---------- */
+
+function preloadImage(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve();
+    const img = new Image();
+    img.onload = img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
+function preloadAllImages() {
+  const urls = new Set();
+
+  // Статические изображения страниц
+  urls.add('img/hero.png');
+  urls.add('img/pickup.png');
+  urls.add('img/address-empty.png');
+
+  // Все картинки из базы (блюда + ингредиенты тарелки)
+  if (typeof DB !== 'undefined') {
+    (DB.dishes     || []).forEach(d => d.photo && urls.add(d.photo));
+    (DB.garnishes  || []).forEach(i => i.photo && urls.add(i.photo));
+    (DB.proteins   || []).forEach(i => i.photo && urls.add(i.photo));
+    (DB.vegetables || []).forEach(i => i.photo && urls.add(i.photo));
+  }
+
+  return Promise.all([...urls].map(preloadImage));
+}
+
+function initSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+
+  // Помечаем, что сплэш управляется app.js — fallback в HTML не сработает
+  splash.dataset.managed = 'true';
+
+  const started = performance.now();
+  const MIN_VISIBLE = 1200;   // минимум 1.2с — чтобы буква успела проявиться
+  const MAX_WAIT    = 8000;   // максимум 8с — если что-то зависло, всё равно скроем
+
+  // Ждём полной загрузки страницы (все скрипты, шрифты, стили, картинки в DOM)
+  const windowReady = new Promise((resolve) => {
+    if (document.readyState === 'complete') return resolve();
+    window.addEventListener('load', () => resolve(), { once: true });
+  });
+
+  // Предзагружаем ВСЕ картинки из базы (включая те, что были бы lazy)
+  const assetsReady = preloadAllImages();
+
+  // Страховка от зависания
+  const timeout = new Promise((resolve) => setTimeout(resolve, MAX_WAIT));
+
+  // Что наступит раньше — полная загрузка или таймаут
+  Promise.race([
+    Promise.all([windowReady, assetsReady]),
+    timeout
+  ]).catch(() => {
+    // если что-то пошло не так с preload — просто идём дальше
+  }).then(() => {
+    // Соблюдаем минимальное время показа
+    const elapsed = performance.now() - started;
+    const remaining = Math.max(0, MIN_VISIBLE - elapsed);
+
+    setTimeout(() => {
+      splash.classList.add('splash--hide');
+      // Убираем из DOM после анимации исчезновения
+      setTimeout(() => splash.remove(), 600);
+    }, remaining);
+  });
+}
+
+/* ---------- Карусель-витрина: счётчик слайдов ---------- */
+
+function initShowcase() {
+  const track = document.getElementById('showcase-track');
+  if (!track) return;
+
+  const realCards = [...track.querySelectorAll('.showcase-card')];
+  const total = realCards.length;
+  if (total < 3) return;
+
+  const currentEl = document.getElementById('showcase-current');
+  const totalEl   = document.getElementById('showcase-total');
+  if (totalEl) totalEl.textContent = String(total).padStart(2, '0');
+
+  // ── Клоны с двух сторон
+  const CLONE = Math.min(2, total);
+  const headClones = realCards.slice(-CLONE).map(c => {
+    const n = c.cloneNode(true);
+    n.setAttribute('aria-hidden', 'true');
+    return n;
+  });
+  const tailClones = realCards.slice(0, CLONE).map(c => {
+    const n = c.cloneNode(true);
+    n.setAttribute('aria-hidden', 'true');
+    return n;
+  });
+
+  const headFrag = document.createDocumentFragment();
+  headClones.forEach(c => headFrag.appendChild(c));
+  track.insertBefore(headFrag, track.firstChild);
+
+  const tailFrag = document.createDocumentFragment();
+  tailClones.forEach(c => tailFrag.appendChild(c));
+  track.appendChild(tailFrag);
+
+  const allCards = [...track.querySelectorAll('.showcase-card')];
+  const pad = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--pad')) || 18;
+
+  let isJumping = false;
+
+  function findClosest() {
+    const trackLeft = track.getBoundingClientRect().left + pad;
+    let closest = 0, minDist = Infinity;
+    allCards.forEach((c, i) => {
+      const d = Math.abs(c.getBoundingClientRect().left - trackLeft);
+      if (d < minDist) { minDist = d; closest = i; }
+    });
+    return closest;
+  }
+
+  function instantJumpTo(allIdx) {
+    const target = allCards[allIdx];
+    if (!target) return;
+    const delta = target.getBoundingClientRect().left
+                - track.getBoundingClientRect().left - pad;
+
+    const prevBehavior = track.style.scrollBehavior;
+    const prevSnap     = track.style.scrollSnapType;
+    track.style.scrollBehavior = 'auto';
+    track.style.scrollSnapType = 'none';
+    track.scrollLeft = track.scrollLeft + delta;
+    void track.offsetHeight;
+    track.style.scrollBehavior = prevBehavior || '';
+    track.style.scrollSnapType = prevSnap || '';
+  }
+
+  // ── Телепорт: только когда скролл остановился
+  function doJumpIfNeeded() {
+    if (isJumping) return;
+    const closest = findClosest();
+
+    if (closest >= CLONE + total) {
+      isJumping = true;
+      instantJumpTo(closest - total);
+      setTimeout(() => { isJumping = false; }, 60);
+    } else if (closest < CLONE) {
+      isJumping = true;
+      instantJumpTo(closest + total);
+      setTimeout(() => { isJumping = false; }, 60);
+    }
+  }
+
+  // ── Счётчик обновляем вживую (плавность UX), а прыжок — отдельно
+  let raf = null;
+  function onScroll() {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      if (isJumping) return;
+      const closest = findClosest();
+      const realIdx = ((closest - CLONE) % total + total) % total;
+      if (currentEl) currentEl.textContent = String(realIdx + 1).padStart(2, '0');
+    });
+  }
+  track.addEventListener('scroll', onScroll, { passive: true });
+
+  // ── Триггер прыжка: scrollend, а если браузер не умеет — idle 150ms
+  if ('onscrollend' in window) {
+    track.addEventListener('scrollend', doJumpIfNeeded, { passive: true });
+  } else {
+    let idleTimer = null;
+    track.addEventListener('scroll', () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(doJumpIfNeeded, 150);
+    }, { passive: true });
+  }
+
+  // ── Стартовая позиция
+  requestAnimationFrame(() => {
+    instantJumpTo(CLONE);
+    if (currentEl) currentEl.textContent = '01';
+  });
+
+  // ── goNext() — плавный скролл на одну карточку
+  function goNext() {
+    if (isJumping) return;
+    const closest = findClosest();
+    const nextCard = allCards[closest + 1];
+    if (!nextCard) {
+      // не должно случаться после прыжка, но страхуемся
+      doJumpIfNeeded();
+      return;
+    }
+    const delta = nextCard.getBoundingClientRect().left
+                - track.getBoundingClientRect().left - pad;
+    track.scrollTo({ left: track.scrollLeft + delta, behavior: 'smooth' });
+  }
+
+  // ── Автоплей
+  const prefersReducedMotion =
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let autoplayTimer = null;
+  let isPaused = false;
+  function startAutoplay() {
+    if (autoplayTimer) return;
+    autoplayTimer = setInterval(() => {
+  if (isPaused) return;
+  if (document.querySelector('.modal.open')) return;   // ← новая строка
+  goNext();
+}, 4000);
+  }
+  function stopAutoplay() {
+    if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
+  }
+  function pause()  { isPaused = true; }
+  function resume() { isPaused = false; stopAutoplay(); startAutoplay(); }
+
+  ['touchstart', 'pointerdown', 'mouseenter'].forEach(evt =>
+    track.addEventListener(evt, pause, { passive: true })
+  );
+  ['touchend', 'pointerup', 'mouseleave'].forEach(evt =>
+    track.addEventListener(evt, resume, { passive: true })
+  );
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pause();
+    else resume();
+  });
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) resume();
+      else pause();
+    }, { threshold: 0.05 }).observe(track);
+  }
+
+  if (!prefersReducedMotion) startAutoplay();
+}
+
 /* ---------- Init ---------- */
 function init() {
   load();
   renderHome();
   updateCartBadge();
   showScreen('home');
+  initSplash();
+  initShowcase();   // ← добавить
 }
 document.addEventListener('DOMContentLoaded', init);

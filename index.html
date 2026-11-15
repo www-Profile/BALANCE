@@ -8,6 +8,8 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
 <link rel="apple-touch-icon" href="icon.svg" />
   <meta name="description" content="BALANCE — полезная сбалансированная еда. Точный вес, честный КБЖУ." />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>BALANCE — Сбалансированная еда</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,6 +17,11 @@
   <link rel="stylesheet" href="StylesMobile.css" />
 </head>
 <body>
+
+    <!-- ============ SPLASH / ЭКРАН ЗАГРУЗКИ ============ -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <span class="splash-letter">B</span>
+  </div>
 
   <div class="grain" aria-hidden="true"></div>
 
@@ -31,15 +38,12 @@
     <!-- Затемнение для читаемости текста -->
     <div class="hero-overlay"></div>
 
-    <!-- Логотип сверху -->
-    <div class="hero-top">
-      <div class="logo">
-        <span class="logo-mark"></span>
-        BALANCE
-      </div>
-    </div>
+<!-- Логотип сверху -->
+<div class="hero-top">
+  <div class="logo">BALANCE</div>
+</div>
 
-    <h1 class="hero-title">Ешь <em>осознанно</em>.<br />Живи <em>легко</em>.</h1>
+    <h1 class="hero-title">Точно о еде. <br>Честно о тебе.</h1>
 
     <div class="hero-actions">
       <button class="btn btn-lime btn-block" data-nav="build">
@@ -49,6 +53,61 @@
       <button class="hero-link" data-nav="menu">или посмотреть меню →</button>
     </div>
   </div>
+
+<section class="block block--carousel">
+  <div class="block-head">
+    <h2>Специальные предложения</h2>
+    <span class="showcase-counter">
+      <b id="showcase-current">01</b> / <span id="showcase-total">06</span>
+    </span>
+  </div>
+
+  <div class="showcase">
+    <div class="showcase-track" id="showcase-track">
+<article class="showcase-card" data-showcase="athletes" style="cursor:pointer">
+  <img src="img/showcase-1.jpg" alt="Скидки спортсменам" loading="lazy">
+  <div class="showcase-caption">
+    <h3 class="showcase-caption-title">Скидки спортсменам</h3>
+  </div>
+</article>
+
+      <article class="showcase-card">
+        <img src="img/showcase-2.jpg" alt="Сборка тарелки" loading="lazy">
+        <div class="showcase-caption">
+          <h3 class="showcase-caption-title">Собираем при вас</h3>
+        </div>
+      </article>
+
+      <article class="showcase-card">
+        <img src="img/showcase-3.jpg" alt="Готовая тарелка" loading="lazy">
+        <div class="showcase-caption">
+          <h3 class="showcase-caption-title">Точный вес и КБЖУ</h3>
+        </div>
+      </article>
+
+      <article class="showcase-card">
+        <img src="img/showcase-4.jpg" alt="Свежие овощи" loading="lazy">
+        <div class="showcase-caption">
+          <h3 class="showcase-caption-title">Овощи с рынка</h3>
+        </div>
+      </article>
+
+      <article class="showcase-card">
+        <img src="img/showcase-5.jpg" alt="Упаковка заказа" loading="lazy">
+        <div class="showcase-caption">
+          <h3 class="showcase-caption-title">Приезжает тёплым</h3>
+        </div>
+      </article>
+
+      <article class="showcase-card">
+        <img src="img/showcase-6.jpg" alt="Крупный план блюда" loading="lazy">
+        <div class="showcase-caption">
+          <h3 class="showcase-caption-title">Без сюрпризов</h3>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 
   <section class="block">
     <div class="block-head">
@@ -469,10 +528,19 @@
         <label>Фамилия</label>
         <input id="pe-lastName" type="text" placeholder="...">
       </div>
-      <div class="form-field">
-        <label>Почта</label>
-        <input id="pe-email" type="email" placeholder="..." autocomplete="email">
-      </div>
+<div class="form-field">
+  <label>Почта</label>
+  <input
+    id="pe-email"
+    type="email"
+    placeholder="name@mail.ru"
+    autocomplete="email"
+    inputmode="email"
+    autocapitalize="off"
+    spellcheck="false"
+    maxlength="254"
+  >
+</div>
 
       <button class="btn btn-lime btn-block" id="pe-save" style="margin-top:10px">Сохранить</button>
     </div>
@@ -541,8 +609,62 @@
   </div>
 </div>
 
+<!-- ============ МОДАЛКА ПАРТНЁРА DDX ============ -->
+<div class="modal" id="athletes-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-athletes></div>
+  <div class="modal-sheet" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <button class="modal-close" data-close-athletes aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    <div class="modal-body">
+
+      <div class="modal-photo">
+        <img src="img/showcase-1.jpg" alt="DDX × BALANCE">
+      </div>
+
+      <h1 class="modal-title">Скидка <em class="athletes-accent">5%</em> для клиентов DDX</h1>
+      <p class="modal-desc">
+        BALANCE сотрудничает с фитнес-клубом DDX. Держателям клубной карты —
+        скидка 5% на любой заказ.
+      </p>
+
+      <h3 class="modal-h3">Как получить</h3>
+      <ol class="athletes-steps">
+        <li>Оформите заказ в приложении на любую сумму</li>
+        <li>При получении покажите карту или приложение DDX</li>
+        <li>Курьер применит скидку 5% на месте</li>
+      </ol>
+
+      <div class="athletes-card">
+        <div class="athletes-card-logo">DDX</div>
+        <div class="athletes-card-text">
+          <b>DDX × BALANCE</b>
+          <small>Партнёрская программа</small>
+        </div>
+      </div>
+
+      <p class="athletes-note">Скидка не суммируется с персональной накопительной скидкой.</p>
+    </div>
+  </div>
+</div>
+
 <script src="https://api-maps.yandex.ru/2.1/?apikey=09410c23-de80-401f-be74-7f6ccbb42c9c&lang=ru_RU"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
+  <!-- Fallback: если app.js не стартовал (404/ошибка), скроем сплэш через 8с -->
+<script>
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var s = document.getElementById('splash');
+      if (s && !s.dataset.managed && !s.classList.contains('splash--hide')) {
+        s.classList.add('splash--hide');
+        setTimeout(function () { if (s.parentNode) s.remove(); }, 600);
+      }
+    }, 8000);
+  });
+</script>
 </body>
 </html>

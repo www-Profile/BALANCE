@@ -74,6 +74,56 @@ img { display: block; max-width: 100%; }
 
 .muted { color: var(--ink-2); }
 
+/* =========================================================
+   Splash / экран загрузки
+   ========================================================= */
+
+/* =========================================================
+   Splash / экран загрузки
+   ========================================================= */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--lime);
+  display: grid;
+  place-items: center;
+  opacity: 1;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0s linear 0.5s;
+}
+
+/* Этот класс добавляет app.js, когда всё загружено */
+.splash.splash--hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-letter {
+  font-family: var(--font-serif);
+  font-size: clamp(90px, 24vw, 130px);
+  font-weight: 500;
+  font-style: italic;
+  color: var(--navy);
+  line-height: 1;
+  opacity: 0;
+  animation:
+    splashLetterIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.25s forwards,
+    splashBreathe 2s ease-in-out 1.2s infinite;
+}
+
+@keyframes splashLetterIn {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Лёгкое «дыхание» буквы, пока идёт загрузка — чтобы экран не казался зависшим */
+@keyframes splashBreathe {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.75; }
+}
+
 /* ---------- Grain-текстура ---------- */
 .grain {
   position: fixed;
@@ -260,71 +310,67 @@ img { display: block; max-width: 100%; }
 .btn-block { width: 100%; }
 
 /* =========================================================
-   HERO — full-bleed, логотип сверху, фото, кнопки внизу
+   HERO — современный редакционный стиль
+   Кремовый фон в тон статус-бару, прозрачное фото,
+   тёмная типографика, лаймовый акцент-маркер
    ========================================================= */
-
-   /* Слой с фото */
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0;
-}
-
-/* Затемнение поверх фото, чтобы текст был читаемым */
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(23, 43, 58, 0.55) 0%,
-    rgba(23, 43, 58, 0.25) 30%,
-    rgba(23, 43, 58, 0.7) 70%,
-    rgba(23, 43, 58, 0.9) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
 
 .hero {
   position: relative;
-  background: var(--navy);
-  color: #fff;
+  background: var(--bg);                 /* #F7F6F0 — как body и theme-color */
+  color: var(--navy);
   margin: 0 calc(var(--pad) * -1);
-  padding: 22px var(--pad) 118px;
+  padding: 22px var(--pad) 40px;
   overflow: hidden;
   isolation: isolate;
-  height: 100svh;
+  min-height: 109svh;
   display: flex;
   flex-direction: column;
 }
 
-/* Мягкое свечение на фоне */
+/* Мягкие цветовые пятна для объёма — вместо «тёмной вуали» */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 50% at 50% 38%, rgba(183, 227, 106, 0.18), transparent 70%),
-    radial-gradient(ellipse 60% 45% at 0% 100%, rgba(104, 185, 149, 0.14), transparent 70%);
+    radial-gradient(ellipse 70% 45% at 50% 30%, rgba(183, 227, 106, 0.16), transparent 65%),
+    radial-gradient(ellipse 55% 40% at 100% 80%, rgba(240, 164, 93, 0.10), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 0% 72%, rgba(104, 185, 149, 0.10), transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* Плавный переход в кремовый внизу */
-.hero::after {
-  content: '';
+/* Фото прозрачного PNG — фон страницы поверх кремового */
+.hero-bg {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 118px;
-  background: linear-gradient(180deg, rgba(247, 246, 240, 0) 0%, rgba(247, 246, 240, 0.7) 55%, var(--bg) 100%);
-  pointer-events: none;
-  z-index: 4;
+  inset: 0;
+  background-size: cover;                /* можно заменить на contain, если нужно видеть тарелку целиком */
+  background-position: center 40%;
+  background-repeat: no-repeat;
+  z-index: 1;
+  filter: drop-shadow(0 40px 80px rgba(23, 43, 58, 0.10));
 }
+
+/* Градиент только у краёв — читаемость без затемнения */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    rgba(247, 246, 240, 0.55) 20%,
+    rgba(247, 246, 240, 0) 38%,
+    rgba(247, 246, 240, 0) 58%,
+    rgba(247, 246, 240, 0.72) 80%,
+    var(--bg) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Нижний navy-fade больше не нужен */
+.hero::after { display: none; }
 
 /* Текст и кнопки поверх фото */
 .hero-top,
@@ -334,69 +380,44 @@ img { display: block; max-width: 100%; }
   z-index: 3;
 }
 
-/* ---------- Верхняя строка с логотипом ---------- */
+/* ---------- Верхняя строка: логотип по центру ---------- */
 
 .hero-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;     /* ← центр по горизонтали */
   margin-bottom: 24px;
 }
 
 .hero .logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  font-size: 22px;
+  font-family: var(--font-ui);
   font-weight: 800;
-  font-size: 19px;
-  letter-spacing: 0.02em;
-  color: #fff;
+  letter-spacing: 0.22em;
+  font-style: normal;     /* разреженные буквы = «бренд» */
   text-transform: uppercase;
+  color: var(--navy);
+  line-height: 1;
+  padding-left: 0.14em;        /* компенсирует трекинг справа, чтобы центр был настоящим */
 }
-
-.hero .logo-mark {
-  width: 22px;
-  height: 22px;
-  border-radius: 8px;
-  background: var(--lime);
-  position: relative;
-  display: inline-block;
-  flex: none;
-}
-.hero .logo-mark::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border-radius: 4px;
-  background: var(--navy);
-}
-
-/* ---------- Фото тарелки (placeholder) ---------- */
-
 
 
 /* ---------- Заголовок ---------- */
-
 .hero-title {
   font-family: var(--font-serif);
-  font-size: clamp(36px, 10.5vw, 48px);
+  font-size: clamp(38px, 11vw, 52px);
   font-weight: 400;
   line-height: 1.02;
   letter-spacing: -0.045em;
   font-variation-settings: "opsz" 144;
-  margin-top: auto;      /* ← прижимает к низу */
-  margin-bottom: 10px;
+  margin-top: auto;
+  margin-bottom: 12px;
   text-align: left;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);   /* ← тень для читаемости */
-}
-.hero-title em {
+  color: var(--navy);
   font-style: italic;
-  font-weight: 400;
-  color: var(--lime);
 }
 
 /* ---------- Кнопки ---------- */
-
 .hero-actions {
   display: flex;
   flex-direction: column;
@@ -405,29 +426,25 @@ img { display: block; max-width: 100%; }
 }
 
 .hero-link {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--ink-2);
   font-size: 13.5px;
   font-weight: 600;
   padding: 8px;
   text-align: center;
   transition: color 0.2s;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
-.hero-link:hover { color: var(--lime); }
+.hero-link:hover { color: var(--navy); }
 
-/* ---------- Стаггер ---------- */
-
+/* ---------- Стаггер (оставляем) ---------- */
 .screen.active .hero-top,
-.screen.active .hero-media,
 .screen.active .hero-title,
 .screen.active .hero-actions > * {
   animation: revealUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.screen.active .hero-top                        { animation-delay: 0.04s; }
-.screen.active .hero-media                      { animation-delay: 0.10s; }
-.screen.active .hero-title                      { animation-delay: 0.18s; }
-.screen.active .hero-actions > *:nth-child(1)   { animation-delay: 0.26s; }
-.screen.active .hero-actions > *:nth-child(2)   { animation-delay: 0.34s; }
+.screen.active .hero-top                      { animation-delay: 0.04s; }
+.screen.active .hero-title                    { animation-delay: 0.18s; }
+.screen.active .hero-actions > *:nth-child(1) { animation-delay: 0.26s; }
+.screen.active .hero-actions > *:nth-child(2) { animation-delay: 0.34s; }
 
 @keyframes revealUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -536,6 +553,104 @@ img { display: block; max-width: 100%; }
 }
 
 .adv-card p { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+
+/* =========================================================
+   Карусель-витрина (showcase)
+   ========================================================= */
+
+.block--carousel { margin-top: 40px; }
+
+.showcase { position: relative; }
+
+/* Счётчик в правом углу блока — наследует baseline у .block-head */
+.showcase-counter {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.showcase-counter b {
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Лента */
+.showcase-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  margin: 0 calc(var(--pad) * -1);
+  margin-bottom: -44px;              /* ← компенсируем увеличенный padding */
+  padding: 6px var(--pad) 58px;      /* ← 58px = 14px (было) + 44px (место под тень) */
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: var(--pad);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.showcase-track::-webkit-scrollbar { display: none; }
+
+/* Карточка */
+.showcase-card {
+  position: relative;
+  flex: none;
+  width: min(78vw, 320px);
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: linear-gradient(135deg, #E7E4DA, #F2F0E8);
+  box-shadow: var(--shadow-lg);
+  isolation: isolate;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.showcase-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.2, 0.6, 0.3, 1);
+}
+
+/* Затемнение снизу под подпись */
+.showcase-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(23, 43, 58, 0)    45%,
+    rgba(23, 43, 58, 0.55) 78%,
+    rgba(23, 43, 58, 0.88) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Подпись поверх фото */
+.showcase-caption {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  color: #fff;
+}
+
+.showcase-caption-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
 
 /* =========================================================
    Поиск и чипы
@@ -1982,8 +2097,9 @@ img { display: block; max-width: 100%; }
   background: var(--bg);
   border-radius: 28px 28px 0 0;
   padding: 8px 18px calc(28px + env(safe-area-inset-bottom));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;                 /* ← скролл переехал в .modal-body */
+  display: flex;                    /* ← фикс-хэндл сверху, скролл-контент снизу */
+  flex-direction: column;
   transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: 0 -20px 60px rgba(23, 43, 58, 0.2);
@@ -2020,7 +2136,14 @@ img { display: block; max-width: 100%; }
 }
 .modal-close:active { transform: scale(0.9); }
 
-.modal-body { padding-top: 4px; }
+.modal-body {
+  padding-top: 4px;
+  overflow-y: auto;                 /* ← скроллится только контент */
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;                    /* ← критично для flex-скролла */
+  overscroll-behavior: contain;
+}
 
 .modal-photo {
   aspect-ratio: 4 / 3;
@@ -2039,6 +2162,14 @@ img { display: block; max-width: 100%; }
   line-height: 1.1;
   margin-bottom: 10px;
   color: var(--navy);
+}
+
+.athletes-accent {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--lime);
+  padding-bottom: 0.02em;
+  white-space: nowrap;   /* «5%» не должно разорваться переносом */
 }
 
 .modal-desc {
@@ -2295,6 +2426,10 @@ img { display: block; max-width: 100%; }
   margin-bottom: 6px;
 }
 
+.field-hint.error {
+  color: #E2557A;
+}
+
 .form-field label {
   font-size: 10.5px;
   font-weight: 800;
@@ -2469,6 +2604,104 @@ body.address-screen .app {
   max-width: 32ch;
   margin: 0 auto;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================================
+   Модалка партнёра DDX
+   ========================================================= */
+
+.athletes-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(183, 227, 106, 0.22);
+  color: #4A7A1F;
+  margin-bottom: 10px;
+}
+
+.athletes-steps {
+  list-style: none;
+  counter-reset: step;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 0;
+}
+.athletes-steps li {
+  counter-increment: step;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.athletes-steps li::before {
+  content: counter(step);
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--navy);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.athletes-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--r-lg);
+  margin-bottom: 14px;
+}
+.athletes-card-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--lime);
+  color: var(--navy);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  flex: none;
+}
+.athletes-card-text b {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+.athletes-card-text small {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+.athletes-note {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
 }
 
 /* =========================================================
