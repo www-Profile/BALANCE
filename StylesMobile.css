@@ -351,7 +351,7 @@ img { display: block; max-width: 100%; }
   padding: 22px var(--pad) 40px;
   overflow: hidden;
   isolation: isolate;
-  min-height: 100svh;
+  min-height: 104svh;
   display: flex;
   flex-direction: column;
 }
